@@ -1,7 +1,7 @@
 # Certified Monotonic Neural Networks
 This repo contains the code for NeurIPS 2020 spotlight paper: 
 ## [Certified Monotonic Neural Networks](https://arxiv.org/abs/2011.10219) 
-, *Xingchao Liu, Xing Han, Na Zhang, Qiang Liu* from UT Austin and Tsinghua University
+by *Xingchao Liu, Xing Han, Na Zhang, Qiang Liu* from UT Austin and Tsinghua University
 
 Requirements: python>=3.7, PyTorch>=1.0.0, Gurobi>=9.0.1
 
