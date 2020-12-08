@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import torch.utils.data as Data
 
-def certify_grad_with_gurobi(first_layer, second_layer, mono_feature_num):
+def certify_grad_with_gurobi(first_layer, second_layer, mono_feature_num, direction=None):
+    ### default: certify monotonically increasing; if set direction=[1, -1], 1 means inc, -1 means dec
     mono_flag = True
     w1 = first_layer.weight.data.detach().cpu().numpy().astype('float64')
     w2 = second_layer.weight.data.detach().cpu().numpy().astype('float64')
@@ -18,6 +19,10 @@ def certify_grad_with_gurobi(first_layer, second_layer, mono_feature_num):
     feature_num = w1.shape[1]
     
     for p in range(mono_feature_num):
+        if direction is not None:
+            if direction[p] == -1:
+                w2 = -w2
+
         fc_first = w1[:, p]
         
         m_up = np.sum(np.maximum(w1, 0.0), axis=1) + b1
@@ -58,6 +63,10 @@ def certify_grad_with_gurobi(first_layer, second_layer, mono_feature_num):
             print('Non-monotonic')
             mono_flag = False
             break
+        
+        if direction is not None:
+            if direction[p] == -1:
+                w2 = -w2
 
     return mono_flag
 

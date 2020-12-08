@@ -2,6 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+def softtanh(x):
+    x = F.tanh(x) * 0.5 + 0.5 
+    
+    return x
+
 class MLP_relu(nn.Module):
     def __init__(self, mono_feature, non_mono_feature, mono_sub_num=1, non_mono_sub_num=1, mono_hidden_num = 5, non_mono_hidden_num = 5, compress_non_mono=False, normalize_regression=False):
         super(MLP_relu, self).__init__()
@@ -36,7 +41,7 @@ class MLP_relu(nn.Module):
         for i in range(int(len(self.mono_submods_out))):
             x = self.mono_submods_out[i](x)
             x = F.hardtanh(x, min_val=0.0, max_val=1.0)
-            
+
             y = self.non_mono_submods_out[i](y)
             y = F.hardtanh(y, min_val=0.0, max_val=1.0)
             
@@ -96,8 +101,8 @@ class InterConv(nn.Module):
         self.conv3 = nn.Conv2d(20, 50, 3, 1)
         self.img_to_vector = nn.Linear(800, class_num, bias=True)
         
-        self.submods_in = nn.ModuleList([nn.Linear(class_num, hidden_num, bias=True) for i in range(layer_num)]) 
-        self.submods_out = nn.ModuleList([nn.Linear(hidden_num, class_num, bias=True) for i in range(layer_num)])
+        self.mono_submods_in = nn.ModuleList([nn.Linear(class_num, hidden_num, bias=True) for i in range(layer_num)]) 
+        self.mono_submods_out = nn.ModuleList([nn.Linear(hidden_num, class_num, bias=True) for i in range(layer_num)])
         self.class_num = class_num 
 
     def forward(self, x):
@@ -110,11 +115,11 @@ class InterConv(nn.Module):
         
         x = x.view(-1, 4*4*50) 
         x = self.img_to_vector(x)
-        for i in range(int(len(self.submods_out))):
-            x = F.hardtanh(x, min_val =0.0, max_val = 1.0)
-            x = self.submods_in[i](x)
+        for i in range(int(len(self.mono_submods_out))):
+            x = F.hardtanh(x, min_val=0.0, max_val=1.0)
+            x = self.mono_submods_in[i](x)
             x = F.relu(x)
-            x = self.submods_out[i](x)
+            x = self.mono_submods_out[i](x)
             
         return x
     
@@ -130,12 +135,12 @@ class InterConv(nn.Module):
         x = x.view(-1, 4*4*50) 
         
         x = self.img_to_vector(x)
-        for i in range(int(len(self.submods_out))):
-            x = F.hardtanh(x, min_val =0.0, max_val = 1.0)
+        for i in range(int(len(self.mono_submods_out))):
+            x = softtanh(x)
             out_list.append(x)
-            x = self.submods_in[i](x)
+            x = self.mono_submods_in[i](x)
             x = F.relu(x)
-            x = self.submods_out[i](x)
+            x = self.mono_submods_out[i](x)
 
         return x, out_list
 
@@ -143,14 +148,14 @@ class InterConv(nn.Module):
         in_list = []
         out_list = []
         
-        for i in range(int(len(self.submods_out))):
+        for i in range(int(len(self.mono_submods_out))):
             input_feature = torch.rand(num, self.class_num).cuda()
             in_list.append(input_feature)
             in_list[-1].requires_grad = True
 
-            x = self.submods_in[i](input_feature)
+            x = self.mono_submods_in[i](input_feature)
             x = F.relu(x)
-            x = self.submods_out[i](x)
+            x = self.mono_submods_out[i](x)
             out_list.append(x)
 
         return in_list, out_list
@@ -163,8 +168,8 @@ class InterConv_Robust(nn.Module):
         self.conv3 = nn.Conv2d(20, 50, 3, 1)
         self.img_to_vector = nn.Linear(800, class_num, bias=True)
         
-        self.submods_in = nn.ModuleList([nn.Linear(class_num, hidden_num, bias=True) for i in range(layer_num)]) 
-        self.submods_out = nn.ModuleList([nn.Linear(hidden_num, class_num, bias=True) for i in range(layer_num)])
+        self.mono_submods_in = nn.ModuleList([nn.Linear(class_num, hidden_num, bias=True) for i in range(layer_num)]) 
+        self.mono_submods_out = nn.ModuleList([nn.Linear(hidden_num, class_num, bias=True) for i in range(layer_num)])
         self.class_num = class_num 
 
     def forward(self, x):
@@ -177,11 +182,11 @@ class InterConv_Robust(nn.Module):
         
         x = x.view(-1, 4*4*50) 
         x = self.img_to_vector(x)
-        for i in range(int(len(self.submods_out))):
-            x = (F.tanh(x)+1.)*0.5
-            x = self.submods_in[i](x)
+        for i in range(int(len(self.mono_submods_out))):
+            x = softtanh(x)
+            x = self.mono_submods_in[i](x)
             x = F.relu(x)
-            x = self.submods_out[i](x)
+            x = self.mono_submods_out[i](x)
             
         return x
  

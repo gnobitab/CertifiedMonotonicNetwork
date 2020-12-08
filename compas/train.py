@@ -69,8 +69,6 @@ def generate_regularizer(in_list, out_list):
             grad_input_neg = -grad_input
             grad_input_neg += .2
             grad_input_neg[grad_input_neg < 0.] = 0.
-            #reg_loss += torch.mean(grad_input_neg**2)
-            #reg_loss += torch.max(grad_input_neg**2)
             if min_derivative < torch.max(grad_input_neg**2):
                 min_derivative = torch.max(grad_input_neg**2)
     reg_loss = min_derivative
