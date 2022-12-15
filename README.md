@@ -9,6 +9,10 @@ Requirements: python>=3.7, PyTorch>=1.0.0, Gurobi>=9.0.1
 
 2. The network structure is slightly modified compared to the ones in the paper. The networks in this repo have less parameters but similar performance.
 
+## Related Work:
+A concurrent work that is highly related to ours is 
+[Counterexample-Guided Learning of Monotonic Neural Networks](https://proceedings.neurips.cc/paper/2020/file/8ab70731b1553f17c11a3bbc87e0b605-Paper.pdf), and their code is available [here](https://github.com/AishwaryaSivaraman/COMET) 
+
 ## Citation:
 If you use the code or our work is related to yours, please cite us:
 ```
