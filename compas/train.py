@@ -118,6 +118,7 @@ def val():
     return torch.sum(out==y_val)/float(y_val.numel())
 
 if __name__ == '__main__':
+    setup_seed(1)
     val_acc = 0.
     test_acc = 0.
     for i in range(200):
